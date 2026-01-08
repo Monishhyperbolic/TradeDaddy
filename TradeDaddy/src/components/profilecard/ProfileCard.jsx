@@ -10,7 +10,6 @@ const ANIMATION_CONFIG = {
   DEVICE_BETA_OFFSET: 20,
   ENTER_TRANSITION_MS: 180
 };
-
 const clamp = (v, min = 0, max = 100) => Math.min(Math.max(v, min), max);
 const round = (v, precision = 3) => parseFloat(v.toFixed(precision));
 const adjust = (v, fMin, fMax, tMin, tMax) => round(tMin + ((tMax - tMin) * (v - fMin)) / (fMax - fMin));
