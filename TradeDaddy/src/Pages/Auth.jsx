@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
+import MainLayout from "../components/layout/MainLayout";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -9,12 +10,29 @@ const supabase = createClient(
 
 export default function Auth() {
   const navigate = useNavigate();
+  const [query] = useSearchParams();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState("login");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Animate Modal Entry
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 50);
+  }, []);
+if (query.get("reset") === "success") {
+  setMsg("Password updated successfully! Please log in.");
+}
+
+  // Detect signup success
+  useEffect(() => {
+    if (query.get("signup") === "success") {
+      setMsg("Signup successful! Check your email to verify before logging in.");
+    }
+  }, [query]);
 
   const handleAuth = async () => {
     setMsg("");
@@ -25,10 +43,7 @@ export default function Auth() {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
 
-        setMsg("Signup successful! Please verify your email.");
-        
-        // optional redirect
-        setTimeout(() => navigate("/auth?signup=success"), 800);
+        navigate("/auth?signup=success", { replace: true });
 
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -37,97 +52,168 @@ export default function Auth() {
         const token = data.session.access_token;
         localStorage.setItem("token", token);
 
-        // verify with backend
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/check`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!res.ok) {
-          setMsg("Login OK, but backend rejected token.");
-        } else {
-          setMsg("Login successful! Redirecting...");
-          // redirect to dashboard
-          setTimeout(() => navigate("/dashboard"), 800);
-        }
-      }
+        if (!res.ok) return setMsg("Login OK, but backend rejected token.");
 
+        setMsg("Login successful! Redirecting...");
+        setTimeout(() => navigate("/dashboard"), 700);
+      }
     } catch (err) {
-      setMsg(err.message || "Something went wrong.");
+      setMsg(err.message);
     }
 
     setLoading(false);
   };
 
+  const handleReset = async () => {
+    if (!email) return setMsg("Enter email first.");
+    setMsg("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset`
+    });
+
+    if (error) setMsg(error.message);
+    else setMsg("Password reset link sent! Check your email.");
+
+    setLoading(false);
+  };
+
   return (
-    <div style={{ width: 320, margin: "80px auto", padding: 20, color: "#fff" }}>
-      <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-        {mode === "login" ? "Login" : "Create Account"}
-      </h2>
-
-      <input
-        placeholder="Email"
-        type="email"
-        onChange={(e) => setEmail(e.target.value)}
+    <MainLayout>
+      <div
         style={{
-          width: "100%",
-          marginBottom: 10,
-          padding: 8,
-          borderRadius: 6,
-          border: "1px solid #333",
-          background: "#1c1c1c",
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingTop: 80,
+          paddingBottom: 60,
           color: "#fff"
         }}
-      />
-
-      <input
-        placeholder="Password"
-        type="password"
-        onChange={(e) => setPassword(e.target.value)}
-        style={{
-          width: "100%",
-          marginBottom: 10,
-          padding: 8,
-          borderRadius: 6,
-          border: "1px solid #333",
-          background: "#1c1c1c",
-          color: "#fff"
-        }}
-      />
-
-      <button
-        onClick={handleAuth}
-        disabled={loading}
-        style={{
-          width: "100%",
-          padding: 10,
-          background: "#5227FF",
-          border: "none",
-          borderRadius: 6,
-          color: "#fff",
-          cursor: "pointer",
-          marginTop: 10
-        }}
       >
-        {loading ? "Please wait..." : mode === "login" ? "Login" : "Sign Up"}
-      </button>
+        <div
+          style={{
+            width: 380,
+            padding: "32px 36px",
+            borderRadius: "18px",
+            background: "rgba(20,20,35,0.65)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            boxShadow: "0 0 32px rgba(82,39,255,0.25)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "scale(1)" : "scale(0.92)",
+            transition: "opacity .45s ease, transform .45s cubic-bezier(.16,.84,.44,1)"
+          }}
+        >
+          <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 6 }}>
+            {mode === "login" ? "Welcome Back" : "Create Your Account"}
+          </h2>
 
-      {msg && <p style={{ marginTop: 12, fontSize: 14, opacity: 0.8 }}>{msg}</p>}
+          {mode === "signup" && (
+            <p style={{ opacity: 0.75, fontSize: 14 }}>
+              We will send you a verification email after signup.
+            </p>
+          )}
 
-      <button
-        style={{
-          width: "100%",
-          padding: 10,
-          background: "transparent",
-          border: "none",
-          color: "#aaa",
-          cursor: "pointer",
-          marginTop: 12
-        }}
-        onClick={() => setMode(mode === "login" ? "signup" : "login")}
-        disabled={loading}
-      >
-        {mode === "login" ? "Don't have an account? Sign up" : "Already have an account? Login"}
-      </button>
-    </div>
+          <input
+            placeholder="Email"
+            type="email"
+            onChange={(e) => setEmail(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.25)",
+              background: "rgba(0,0,0,0.35)",
+              color: "#fff",
+              fontSize: 15
+            }}
+          />
+
+          <input
+            placeholder="Password"
+            type="password"
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.25)",
+              background: "rgba(0,0,0,0.35)",
+              color: "#fff",
+              fontSize: 15
+            }}
+          />
+
+          <button
+            onClick={handleAuth}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: 12,
+              background: "#5227FF",
+              borderRadius: 10,
+              border: "none",
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "opacity .25s",
+              marginTop: 6
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = 0.85)}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = 1)}
+          >
+            {loading ? "Please wait..." : mode === "login" ? "Login" : "Sign Up"}
+          </button>
+
+          {mode === "login" && (
+            <button
+              onClick={handleReset}
+              disabled={loading}
+              style={{
+                marginTop: 4,
+                background: "transparent",
+                border: "none",
+                color: "#B8B8FF",
+                cursor: "pointer",
+                fontSize: 13
+              }}
+            >
+              Forgot password?
+            </button>
+          )}
+
+          {msg && (
+            <p style={{ marginTop: 8, fontSize: 13, opacity: 0.85 }}>{msg}</p>
+          )}
+
+          <button
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+            disabled={loading}
+            style={{
+              marginTop: 8,
+              background: "transparent",
+              border: "none",
+              color: "#b8b8ff",
+              fontSize: 14,
+              cursor: "pointer"
+            }}
+          >
+            {mode === "login"
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Login"}
+          </button>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
