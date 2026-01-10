@@ -85,13 +85,46 @@ function Landingpage() {
                 lineHeight: 1.1,
               }}
             />
+<button
+  onClick={goToAuth}
+  style={{
+    position: "relative",
+    padding: "18px 52px",
+    fontSize: "18px",
+    fontWeight: 600,
+    letterSpacing: "0.04em",
+    borderRadius: "16px",
+    border: "2px solid #fff",
+    background: "transparent",
+    color: "#fff",
+    cursor: "pointer",
+    overflow: "hidden",
+    transition: "color 0.35s ease"
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.color = "#000";
+    e.currentTarget.querySelector(".fill").style.transform = "translateX(0)";
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.color = "#fff";
+    e.currentTarget.querySelector(".fill").style.transform = "translateX(100%)";
+  }}
+>
+  <span
+    className="fill"
+    style={{
+      position: "absolute",
+      inset: 0,
+      background: "#fff",
+      borderRadius: "14px",
+      zIndex: -1,
+      transform: "translateX(100%)",
+      transition: "transform 0.35s ease"
+    }}
+  />
+  Get Started
+</button>
 
-            <button
-              className="slide-fill-btn"
-              onClick={goToAuth}
-            >
-              Get Started
-            </button>
           </div>
         </section>
 
