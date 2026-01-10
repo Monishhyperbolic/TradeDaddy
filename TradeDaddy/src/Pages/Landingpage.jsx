@@ -4,7 +4,6 @@ import GooeyNav from '../components/navbar/GooeyNav';
 import ProfileCard from '../components/profilecard/ProfileCard';
 import MagicBento from '../components/features/MagicBento';
 import Footer from '../components/Footer';
-import Auth from "../components/pages/Auth";
 
 function Landingpage() {
   const items = [
