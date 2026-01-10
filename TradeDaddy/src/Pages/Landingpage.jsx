@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import DotGrid from '../components/DotGrid/DotGrid';
 import BlurText from '../components/Text/BlurText';
 import GooeyNav from '../components/navbar/GooeyNav';
@@ -6,11 +7,17 @@ import MagicBento from '../components/features/MagicBento';
 import Footer from '../components/Footer';
 
 function Landingpage() {
+  const navigate = useNavigate();
+
   const items = [
     { label: 'Home', href: '#home' },
     { label: 'Features', href: '#features' },
     { label: 'About', href: '#about' },
   ];
+
+  const goToAuth = () => {
+    navigate("/auth");
+  };
 
   return (
     <div style={{ width: '100vw', overflowX: 'hidden' }}>
@@ -78,7 +85,13 @@ function Landingpage() {
                 lineHeight: 1.1,
               }}
             />
-            <button className="slide-fill-btn" onClick={() => navigate("/auth")} >Get Started</button>
+
+            <button
+              className="slide-fill-btn"
+              onClick={goToAuth}
+            >
+              Get Started
+            </button>
           </div>
         </section>
 
@@ -122,10 +135,8 @@ function Landingpage() {
               alignItems: 'flex-start',
             }}
           >
-            {/* LEFT */}
             <ProfileCard/>
 
-            {/* RIGHT */}
             <div>
               <h2 style={{ fontSize: '48px', marginBottom: 24 }}>About</h2>
               <p
@@ -144,7 +155,6 @@ function Landingpage() {
           </div>
         </section>
 
-        {/* ================= FOOTER ================= */}
         <Footer />
       </main>
     </div>
