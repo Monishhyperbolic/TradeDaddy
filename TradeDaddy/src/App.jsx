@@ -1,18 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Landingpage from "./Pages/Landingpage";
-import Auth from "./Pages/Auth";
-import Dashboard from "./Pages/Dashboard"; // you can create placeholder
+import { useState } from 'react';
+import './App.css';
+import Landing from './Pages/Landingpage';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landingpage />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </BrowserRouter>
-  );
+  return <Landing />;
 }
 
 export default App;
+  return <Landing />;
