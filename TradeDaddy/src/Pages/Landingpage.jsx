@@ -4,6 +4,7 @@ import GooeyNav from '../components/navbar/GooeyNav';
 import ProfileCard from '../components/profilecard/ProfileCard';
 import MagicBento from '../components/features/MagicBento';
 import Footer from '../components/Footer';
+import Auth from "../components/pages/Auth";
 
 function Landingpage() {
   const items = [
@@ -78,7 +79,7 @@ function Landingpage() {
                 lineHeight: 1.1,
               }}
             />
-            <button className="slide-fill-btn">Get Started</button>
+            <button className="slide-fill-btn" onClick={() => navigate("/auth")} >Get Started</button>
           </div>
         </section>
 
